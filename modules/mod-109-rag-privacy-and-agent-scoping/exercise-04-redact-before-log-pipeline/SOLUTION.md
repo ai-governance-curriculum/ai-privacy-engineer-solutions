@@ -551,7 +551,7 @@ Score out of 10. Below 7 → rework.
 
 | Criterion | Points | Notes |
 |---|---|---|
-| Event-schema registry with per-field actions (`raw | hash_keyed | redact_text | drop | sample_verbatim`) | 2 | Drives the whole pipeline |
+| Event-schema registry with per-field actions (`raw` \| `hash_keyed` \| `redact_text` \| `drop` \| `sample_verbatim`) | 2 | Drives the whole pipeline |
 | Unknown field → fail-closed | 1 | Most-missed invariant |
 | Missing `tenant_id` → fail-closed | 1 | — |
 | Keyed HMAC per-tenant, with a rotation path | 2 | Plain SHA fails |
