@@ -303,6 +303,12 @@ def redact(
     for field, rule in schema.items():
         if field not in payload:
             continue
+        if rule.action == "sample_verbatim":
+            # Verbatim is NEVER added to `out` here. It is handled below
+            # only after the tenant opt-in + sampling gate passes, so a
+            # payload that includes `verbatim` cannot leak when consent
+            # is absent or the sample roll rejects the turn.
+            continue
         value = payload[field]
         out[field] = _apply(rule, value, tenant_id=tenant_id, kms=kms)
         if rule.action == "drop":
@@ -354,9 +360,10 @@ def _apply(rule: FieldRule, value: Any, *, tenant_id: str, kms: KMSClient):
     if rule.action == "drop":
         return None
     if rule.action == "sample_verbatim":
-        # Verbatim handled at the top-level above so sampling is applied
-        # once per event, not per field.
-        return value
+        # Unreachable: `sample_verbatim` fields are skipped in the main
+        # loop so the consent + sampling gate owns whether they appear.
+        # Fail-closed here rather than returning the raw value.
+        raise RedactionError("sample_verbatim must be handled post-gate")
     raise RedactionError(f"unknown action: {rule.action}")
 ```
 

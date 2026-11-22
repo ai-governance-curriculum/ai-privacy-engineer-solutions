@@ -140,6 +140,7 @@ set of `doc_ids` (and their hashes) that the *other* tenant owns.
 from __future__ import annotations
 
 import hashlib
+import hmac
 import json
 from dataclasses import dataclass, field
 from typing import Iterable
@@ -152,6 +153,11 @@ import yaml
 class Tenant:
     id: str
     doc_ids: frozenset[str]
+    hmac_key: bytes  # Same key the redactor uses to HMAC doc_ids
+                     # (exercise-04 §2.3). Pulled from the test KMS fake
+                     # so L4's audit assertion can reproduce the real
+                     # audit-log hash, not an unkeyed SHA that will never
+                     # match.
 
 
 @dataclass(frozen=True)
@@ -166,19 +172,47 @@ class Query:
 @dataclass
 class TurnTrace:
     """Shape the RAG service must return on its internal test endpoint."""
-    retrieved: list[dict]         # L1: {"doc_id": ..., "tenant_id": ...}
-    reranked: list[dict]          # L2: same shape, post-rerank
-    prompt_doc_ids: list[str]     # L3: doc_ids that made it into the prompt
+    retrieved: list[dict]          # L1: {"doc_id": ..., "tenant_id": ...}
+    rerank_input: list[dict]       # L2: the FULL candidate batch presented
+                                   # to the reranker, BEFORE rerank. A
+                                   # post-rerank list would miss shared
+                                   # rerank batches that consume another
+                                   # tenant's chunks and then discard them
+                                   # from the output.
+    prompt_doc_ids: list[str]      # L3: doc_ids that made it into the prompt
     audit_doc_id_hashes: list[str]  # L4: what the audit log recorded
 
 
 def hashed(doc_id: str) -> str:
+    """Short, unkeyed identifier for human triage in the report ONLY.
+
+    Do NOT use this to match against audit hashes — the logging pipeline
+    (exercise-04 §2.3) writes tenant-keyed HMACs, not raw SHA, so a
+    `hashed(doc_id)` value will never appear in the audit log.
+    """
     return hashlib.sha256(doc_id.encode()).hexdigest()[:16]
 
 
-def load_tenants(path: str) -> dict[str, Tenant]:
+def audit_hash(doc_id: str, *, tenant_key: bytes) -> str:
+    """Reproduce the redactor's identity hash so L4 can actually match.
+
+    Must stay byte-for-byte identical to `hash_keyed` in exercise-04 §2.3:
+    HMAC-SHA256 under the caller's tenant key, hex, truncated to 32 chars.
+    If the redactor's construction changes, update both in lockstep.
+    """
+    return hmac.new(tenant_key, doc_id.encode(), hashlib.sha256).hexdigest()[:32]
+
+
+def load_tenants(path: str, kms) -> dict[str, Tenant]:
     data = yaml.safe_load(open(path))
-    return {t["id"]: Tenant(t["id"], frozenset(t["doc_ids"])) for t in data}
+    return {
+        t["id"]: Tenant(
+            id=t["id"],
+            doc_ids=frozenset(t["doc_ids"]),
+            hmac_key=kms.get_hmac_key(t["id"]),
+        )
+        for t in data
+    }
 
 
 def load_queries(path: str) -> list[Query]:
@@ -220,16 +254,22 @@ def cross_tenant_hits(
     caller: Tenant, other_doc_ids: frozenset[str], trace: TurnTrace
 ) -> dict[str, list[str]]:
     """Return, per layer, the set of doc_ids that belong to the OTHER tenant."""
-    other_hashes = {hashed(d) for d in other_doc_ids}
+    # L4 matches against the audit log, which stores doc_ids HMAC-ed under
+    # the CALLER's tenant key (exercise-04 §2.3). Compute the expected
+    # other-tenant hashes under the same key so a leak actually matches.
+    other_audit_hashes = {
+        audit_hash(d, tenant_key=caller.hmac_key) for d in other_doc_ids
+    }
     return {
         "L1_retrieval": [c["doc_id"] for c in trace.retrieved
                          if c["doc_id"] in other_doc_ids
                          or c["tenant_id"] != caller.id],
-        "L2_rerank":    [c["doc_id"] for c in trace.reranked
+        "L2_rerank":    [c["doc_id"] for c in trace.rerank_input
                          if c["doc_id"] in other_doc_ids
                          or c["tenant_id"] != caller.id],
         "L3_prompt":    [d for d in trace.prompt_doc_ids if d in other_doc_ids],
-        "L4_audit":     [h for h in trace.audit_doc_id_hashes if h in other_hashes],
+        "L4_audit":     [h for h in trace.audit_doc_id_hashes
+                         if h in other_audit_hashes],
     }
 
 
@@ -271,7 +311,12 @@ def run(
 
 
 def main() -> int:
-    tenants = load_tenants("corpus/tenants.yaml")
+    # The test KMS fake from exercise-04 §2.4 holds the per-tenant HMAC
+    # keys the redactor uses in the test environment. The harness loads
+    # from the same source so L4 audit matches are byte-identical.
+    from redactor.kms import FakeKMS
+    kms = FakeKMS(seeds={"tenant-a": b"a" * 32, "tenant-b": b"b" * 32})
+    tenants = load_tenants("corpus/tenants.yaml", kms)
     queries = load_queries("queries.yaml")
     results = run("http://localhost:8080", tenants, queries)
     failed = [r for r in results if not r["pass"]]
