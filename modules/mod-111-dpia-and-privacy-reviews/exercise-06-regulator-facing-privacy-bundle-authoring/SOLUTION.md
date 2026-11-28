@@ -251,8 +251,22 @@ integrity:
 ```
 
 Every file that appears in the directory must appear in the
-manifest and every manifest row must point at a file. A mismatch
-is a bundle-level failure.
+manifest and every manifest row must point at a file, with one
+carve-out: the integrity envelope itself — `00-cover/MANIFEST.yaml`,
+`signatures/MANIFEST.yaml.sig`, and `signatures/per-file.sha256`
+— is **not** listed under `contents:` and is not covered by
+`per-file.sha256`. Listing them would be circular: a manifest row
+for `MANIFEST.yaml` must contain the hash of the manifest it
+lives in, and a row for `MANIFEST.yaml.sig` must be signed into
+the document it signs. Instead, the manifest's own integrity is
+anchored by `integrity.manifest_hash` (computed over the manifest
+with `manifest_hash` and `signature_file` elided — a canonical
+"hash-with-holes") and by the detached signature at
+`signatures/MANIFEST.yaml.sig` over the finalised manifest bytes;
+`signatures/per-file.sha256` is itself a derivative of `contents:`
+and is verified by recomputation, not by a self-hash. A mismatch
+between `contents:` and the bundle directory (ignoring the three
+envelope files) is a bundle-level failure.
 
 ### 2.5 Risk register shape
 

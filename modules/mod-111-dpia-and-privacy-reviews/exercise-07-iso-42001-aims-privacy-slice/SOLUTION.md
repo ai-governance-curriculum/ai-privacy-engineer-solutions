@@ -201,10 +201,10 @@ Legend for the right-hand columns:
 | **A.6.2.2** Requirements and specification | Personal-data requirements are specified | Art. 5(1)(b)(c), 25 | 27701 A.7.2.1 / B.8.2.1 | `MAP-3.4` | [[exercise-01]] §purposes |
 | **A.6.2.4** Verification and validation | Validate on personal-data constraints | Art. 25 | 27701 A.7.4.X | `MEASURE-2.X` | [[mod-104]], [[mod-106]] |
 | **A.6.2.8** Event logs | Log events relevant to AI operation; personal-data events sub-slice | Art. 30, Art. 32 | 27701 A.7.3.X; 27001 A.8.15 | `MEASURE-2.6` | [[mod-110]] exercise-07 |
-| **A.7.2** Data for development and enhancement | Govern the training data | Art. 5(1)(b)(c), 6, 9, 10 | 27701 A.7.4.X | `MAP-2.3`, `MEASURE-2.7` | [[mod-103]] exercise-01 datasheet |
+| **A.7.2** Data for development and enhancement | Govern the training data | Art. 5(1)(b)(c), 6, 9, 10 | 27701 A.7.4.X | `MAP-2.3`, `MEASURE-2.10` | [[mod-103]] exercise-01 datasheet |
 | **A.7.3** Acquisition of data | Lawful, documented acquisition | Art. 6, 14 (notice at indirect collection) | 27701 A.7.2.3 / B.8.2.4 | `MAP-2.2` | [[mod-103]] |
 | **A.7.5** Data provenance | Where did this data come from | Art. 14, Art. 30 | 27701 A.7.3.X | `MAP-2.3` | [[mod-103]] exercise-06 ML-BoM |
-| **A.7.6** Data preparation | Minimisation, pseudonymisation, de-identification | Art. 5(1)(c), 25, 32 | 27701 A.7.4.5, A.7.4.6 | `MEASURE-2.7`, `MEASURE-2.9` | [[mod-104]], [[mod-106]] |
+| **A.7.6** Data preparation | Minimisation, pseudonymisation, de-identification | Art. 5(1)(c), 25, 32 | 27701 A.7.4.5, A.7.4.6 | `MEASURE-2.10` | [[mod-104]], [[mod-106]] |
 | **A.8.5** Information for interested parties | Notice / transparency to subjects | Art. 12, 13, 14; Art. 22(3) | 27701 A.7.3.2 | `GOVERN-3.2` | [[exercise-06]] §2.1 §06 |
 | **A.10.2** Allocation of responsibilities | Controller / processor / joint-controller clarity | Art. 24, 26, 28 | 27701 A.7.2.6 / B.8.2.1 | `GOVERN-6.1` | [[exercise-06]] §2.1 §05 |
 | **A.10.3** Suppliers | Processor assurance | Art. 28 | 27701 A.7.2.6 / B.8.5.X | `GOVERN-6.1` | [[exercise-06]] §2.1 §05 |
@@ -252,9 +252,9 @@ Simultaneous AIMS / GDPR / local-artefact coverage:
   A.7.4.5 (PII minimisation); A.7.4.6 (de-identification);
   A.7.4.7 (retention).
 - **NIST AI RMF subcategories evidenced:** `MAP-2.3` (data
-  mapping); `MAP-4.1` (impact assessment); `MEASURE-2.7`
-  (data quality and privacy); `MEASURE-2.9` (de-identification);
-  `GOVERN-1.4` (documentation).
+  mapping); `MAP-4.1` (impact assessment); `MEASURE-2.10`
+  (privacy risk of the AI system — including minimisation and
+  de-identification evidence); `GOVERN-1.4` (documentation).
 
 Engineering artefacts a reviewer inspects (one checklist shared
 across the AIMS internal auditor, the DPO, and the AI governance
