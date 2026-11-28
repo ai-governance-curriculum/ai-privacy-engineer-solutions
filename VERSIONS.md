@@ -13,3 +13,4 @@
 | 2026-11-21 | `fill-mod-110-machine-unlearning-and-dsr-solutions` | `mod-110-machine-unlearning-and-dsr` | Fill mod-110-machine-unlearning-and-dsr module exercise solutions |
 | 2026-11-21 | `fill-mod-109-rag-privacy-and-agent-scoping-solutions` | `mod-109-rag-privacy-and-agent-scoping` | Fill mod-109-rag-privacy-and-agent-scoping module exercise solutions |
 | 2026-11-21 | `fill-mod-108-confidential-computing-and-ppi-solutions` | `mod-108-confidential-computing-and-ppi` | Fill mod-108-confidential-computing-and-ppi module exercise solutions |
+| 2026-11-28 | `fill-mod-111-dpia-and-privacy-reviews-solutions` | `mod-111-dpia-and-privacy-reviews` | Fill mod-111-dpia-and-privacy-reviews module exercise solutions |
