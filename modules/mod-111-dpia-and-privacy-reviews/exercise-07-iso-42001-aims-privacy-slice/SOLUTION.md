@@ -352,8 +352,8 @@ hands the auditor four things:
 ### 2.8 Interaction with other frameworks
 
 - **ISO/IEC 27001 + 27701.** 42001 inherits the management-
-  system shell from 27001. An organisation certified to 27001
-  + 27701 has clauses 4–7, 9, 10 largely in place; it needs to
+  system shell from 27001. An organisation certified to 27001 +
+  27701 has clauses 4–7, 9, 10 largely in place; it needs to
   (a) extend the ISMS/PIMS scope to the AIMS, (b) add the AIMS
   Annex A controls not already covered, and (c) author an AIMS
   SoA. The privacy slice overlaps 27701 heavily (see §2.3
